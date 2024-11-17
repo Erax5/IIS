@@ -3,5 +3,4 @@ import numpy as np
 import imageio.v3 as iio
 
 def main():
-    face_tracker = cv2.CascadeClassifier("")
-    return 0
+    original = cv2.imread("toy_knife.jpg")
