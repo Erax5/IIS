@@ -3,3 +3,4 @@ run:
 
 clean:
 	rm ../processed/images/*.jpg
+	rm ../processed/*.csv
