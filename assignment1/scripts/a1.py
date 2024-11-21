@@ -61,10 +61,13 @@ def main():
 
     # ----------------- Split data into positive and negative -----------------
 
+    # filter out file names without extension
     au_df['file'] = au_df['file'].apply(lambda x: os.path.splitext(x)[0])
+
     positive_data = []
     negative_data = []
     
+    # sort by valence
     for i, au_row in au_df.iterrows():
         if au_row.isnull().values.any():
             continue
@@ -78,10 +81,6 @@ def main():
 
     positive_df = pd.DataFrame(positive_data)
     negative_df = pd.DataFrame(negative_data)
-
-    positive_df.to_csv('processed/positive_data.csv', index=False)
-    negative_df.to_csv('processed/negative_data.csv', index=False)
-
     # -------------------------------------------------------------------------
     
     # ----------------- Calculate mean of each AU for positive and negative data and plot -----------------
@@ -103,24 +102,24 @@ def main():
         
         abs_diff[col] = absolute_difference
 
-    #sort the AUs by the absolute difference
+    # sort the AUs by the absolute mean difference (descending)
     abs_diff = dict(sorted(abs_diff.items(), key=lambda item: item[1], reverse=True))
 
-    # Create a DataFrame with AU names and their absolute mean values
+    # Create a DataFrame with AU names and their absolute mean diff values
     abs_diff_df = pd.DataFrame([abs_diff])
     abs_diff_df.to_csv('processed/abs_diff.csv', index=False)
 
     # Plot all values
     plt.plot(list(abs_diff.keys()), list(abs_diff.values()), 'b.')
 
-    # Highlight the 6 highest values
+    # Color the 6 highest mean diff AUs red
     top_6_aus = list(abs_diff.keys())[:6]
     top_6_values = list(abs_diff.values())[:6]
     plt.plot(top_6_aus, top_6_values, 'r.') 
     plt.xticks(rotation=45)
     plt.xlabel('AU')
     plt.ylabel('Absolute difference')
-    plt.title('Absolute difference between positive and negative AU')
+    plt.title('Absolute difference in AU means (pos. vs neg.)')
     # plt.show()
     plt.savefig('processed/au_visualization.png')
 
