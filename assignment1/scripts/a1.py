@@ -8,11 +8,10 @@ from feat.utils import FEAT_EMOTION_COLUMNS
 import pandas as pd 
 import matplotlib.pyplot as plt
 
-images_path = "../dataset/images/"
-images = ['arguing.jpg', 'back-off.jpg']
-output_path = '../processed/images/'
-aus_path = '../processed/aus.csv'
-annotations_path = '../dataset/annotations.csv'
+images_path = "dataset/images/"
+output_path = 'processed/images/'
+aus_path = 'processed/aus.csv'
+annotations_path = 'dataset/annotations.csv'
 annotations_df = pd.read_csv(annotations_path)
 
 def main():
@@ -80,8 +79,8 @@ def main():
     positive_df = pd.DataFrame(positive_data)
     negative_df = pd.DataFrame(negative_data)
 
-    positive_df.to_csv('../processed/positive_data.csv', index=False)
-    negative_df.to_csv('../processed/negative_data.csv', index=False)
+    positive_df.to_csv('processed/positive_data.csv', index=False)
+    negative_df.to_csv('processed/negative_data.csv', index=False)
 
     # -------------------------------------------------------------------------
     
@@ -109,13 +108,13 @@ def main():
 
     # Create a DataFrame with AU names and their absolute mean values
     abs_diff_df = pd.DataFrame([abs_diff])
-    abs_diff_df.to_csv('../processed/abs_diff.csv', index=False)
+    abs_diff_df.to_csv('processed/abs_diff.csv', index=False)
 
     plt.plot(list(abs_diff.keys()), list(abs_diff.values()), 'b.')
     plt.xticks(rotation=45)
     plt.xlabel('AU')
     plt.ylabel('Absolute difference')
     plt.title('Absolute difference between positive and negative AU')
-    plt.show()
-    # plt.savefig('../processed/abs_diff_plot.png')
+    # plt.show()
+    plt.savefig('processed/abs_diff_plot.png')
 main()
