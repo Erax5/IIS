@@ -55,9 +55,6 @@ def main():
     # Save AU activations to CSV outside the loop
     au_df = pd.DataFrame(au_data)
     au_df.to_csv(aus_path, index=False)
-    print(f"AU activations saved to {aus_path}")
-
-
 
     # ----------------- Split data into positive and negative -----------------
 
@@ -110,11 +107,17 @@ def main():
     abs_diff_df = pd.DataFrame([abs_diff])
     abs_diff_df.to_csv('processed/abs_diff.csv', index=False)
 
+    # Plot all values
     plt.plot(list(abs_diff.keys()), list(abs_diff.values()), 'b.')
+
+    # Highlight the 6 highest values
+    top_6_aus = list(abs_diff.keys())[:6]
+    top_6_values = list(abs_diff.values())[:6]
+    plt.plot(top_6_aus, top_6_values, 'r.') 
     plt.xticks(rotation=45)
     plt.xlabel('AU')
     plt.ylabel('Absolute difference')
     plt.title('Absolute difference between positive and negative AU')
     # plt.show()
-    plt.savefig('processed/abs_diff_plot.png')
+    plt.savefig('processed/au_visualization.png')
 main()

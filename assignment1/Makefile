@@ -4,3 +4,4 @@ run:
 clean:
 	rm processed/images/*.jpg
 	rm processed/*.csv
+	rm processed/*.png
