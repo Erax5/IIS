@@ -44,8 +44,8 @@ def main():
         strongest_emotion = emotions.argmax(axis=1)
         for i, (face, top_emo) in enumerate(zip(faces, strongest_emotion)):
             (x0, y0, x1, y1, p) = face
-            cv2.rectangle(frame, (int(x0), int(y0)), (int(x1), int(y1)), (255, 0, 0), 3)
-            cv2.putText(frame, FEAT_EMOTION_COLUMNS[top_emo], (int(x0), int(y0 - 10)), cv2.FONT_HERSHEY_PLAIN, 1.5, (255, 0, 0), 2)
+            cv2.rectangle(frame, (int(x0), int(y0)), (int(x1), int(y1)), (0, 0, 255), 3)
+            cv2.putText(frame, FEAT_EMOTION_COLUMNS[top_emo], (int(x0), int(y0 - 10)), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 255), 2)
 
             au_row = {"file": image, "face": i }
             for j, au_value in enumerate(aus[i]):
