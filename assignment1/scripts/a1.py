@@ -1,13 +1,14 @@
 import cv2
-import numpy as np
-import imageio.v3 as iio
 import os
-from IPython.display import Image
 from feat import Detector, Fex
 from feat.utils import FEAT_EMOTION_COLUMNS
 import pandas as pd 
 import matplotlib.pyplot as plt
 import time
+# används ej:
+# from IPython.display import Image
+# import numpy as np
+# import imageio.v3 as iio
 
 images_path = "dataset/images/"
 output_path = 'processed/images/'
