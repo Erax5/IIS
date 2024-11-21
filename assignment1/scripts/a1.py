@@ -7,6 +7,7 @@ from feat import Detector, Fex
 from feat.utils import FEAT_EMOTION_COLUMNS
 import pandas as pd 
 import matplotlib.pyplot as plt
+import time
 
 images_path = "dataset/images/"
 output_path = 'processed/images/'
@@ -21,6 +22,7 @@ def main():
     positive_data = []
     negative_data = []
     
+    start_time = time.time()
     for image in os.listdir(images_path):
         curr_image_path = images_path + image
         
@@ -120,4 +122,7 @@ def main():
     plt.title('Absolute difference between positive and negative AU')
     # plt.show()
     plt.savefig('processed/au_visualization.png')
+
+    end_time = time.time()
+    print(f"Time taken: {end_time - start_time} seconds")
 main()
