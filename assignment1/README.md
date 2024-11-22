@@ -1,6 +1,6 @@
 Assignment 1: Computer Vision
 By: Nima Dehghanian and Axel Gleisner
-Contributions
+Contributions can be found in 'contributions.md'
 =============================
 When running the code, the output files will be saved in the 'processed' folder.
 
