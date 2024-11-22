@@ -2,6 +2,6 @@ run:
 	python3 scripts/a1.py
 
 clean:
-	rm processed/images/*.jpg
-	rm processed/*.csv
-	rm processed/*.png
+	rm -f processed/images/*.jpg
+	rm -f processed/*.csv
+	rm -f processed/*.png

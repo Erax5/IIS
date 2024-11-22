@@ -1,0 +1,1 @@
+Most of the assignment was done while working together in a VSCode LiveShare. The writing of the code was performed interchangeably, to the point where distinction between participants is difficult. However, plotting of the graph was written by Nima Dehghanian. The reflections were discussed as a pair but most of the report text was written by Axel Gleisner. 
