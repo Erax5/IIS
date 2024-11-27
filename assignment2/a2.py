@@ -13,17 +13,25 @@ import torch
 # 7. Report & submit
 
 class MLP(nn.Module):
-    def __init__(self, features_in=2, features_out=3):
-        super().__init__()
+    def __init__(self, input_size, output_size, hidden_layers):
+        super(MLP, self).__init__()
+        layers = []
+        in_features = input_size
 
-        self.net = nn.Sequential(
-            nn.Linear(features_in, 100),
-            nn.ReLU(),
-            nn.Linear(100, features_out)
-        )
+        # Add hidden layers
+        for hidden_size in hidden_layers:
+            layers.append(nn.Linear(in_features, hidden_size))
+            layers.append(nn.ReLU())
+            in_features = hidden_size
 
-    def forward(self, input):
-        return self.net(input)
+        # Add output layer
+        layers.append(nn.Linear(in_features, output_size))
+
+        # Combine all layers into a sequential model
+        self.model = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return self.model(x)
 
 
 class MultiEmoVA(Dataset):
@@ -59,11 +67,10 @@ class MultiEmoVA(Dataset):
 # 6 = fear
 def main():
     dataset = MultiEmoVA("dataset.csv")
-    # __getitem__(self, index):
-    for index, data in enumerate(dataset):
-        print(f"Index: {index}, Data: {data[0]}, Label: {dataset.index2label[data[1]]}")
-        if index == 5:
-            break
+    # for index, data in enumerate(dataset):
+    #     print(f"Index: {index}, Data: {data[0]}, Label: {dataset.index2label[data[1]]}")
+    #     if index == 5:
+    #         break
 
     # passing a generator to random_split is similar to specifying the seed in sklearn
     generator = torch.Generator().manual_seed(2023)
@@ -76,132 +83,51 @@ def main():
         batch_size=4,  # instead of taking 1 data point at a time we can take more, making our training faster and more stable
         shuffle=True  # Shuffles the data between epochs (see below)
     )
-    model = MLP(train[0][0].shape[0], len(dataset.index2label))
+
+    hidden_layers = [50, 100, 50]
+    model = MLP(train[0][0].shape[0], len(dataset.index2label), hidden_layers)
 
     optim = torch.optim.SGD(model.parameters(), lr=0.001)
 
+    loss_fn = nn.CrossEntropyLoss()
+
+    # Check if we have GPU acceleration, if we do our code will run faster
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    print(f"Using device: {device}")
+
+    # we need to move our model to the correct device
+    model = model.to(device)
+
+    # Training loop
+    num_epochs = 100
+    for _ in range(num_epochs):
+        # model.train()  # Set the model to training mode
+        for inputs, labels in train_loader:
+            inputs, labels = inputs.to(device), labels.to(device)  # Move data to the appropriate device
+
+            # Forward pass
+            outputs = model(inputs)
+            loss = loss_fn(outputs, labels)
+
+            # Backward pass and optimization
+            loss.backward()
+            optim.step()
+            optim.zero_grad()
+   
+    # tell pytorch we're not training anymore
+    with torch.no_grad():
+        test_loader = DataLoader(test, batch_size=4)
+        correct = 0
+        for inputs, labels in test_loader:
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+
+            predictions = model(inputs)
+
+            # Here we go from the models output to a single class and compare to ground truth
+            correct += (predictions.softmax(dim=1).argmax(dim=1) == labels).sum()
+        print(f"Accuracy is: {correct / len(test) * 100}%")
+
 if __name__ == "__main__":
     main()
-
-
-
-
-
-# # 1. Read and Preprocess the dataset in a format that is appropriate for training
-# class EmotionDataset(Dataset):
-#     def __init__(self, data_path):
-#         data = pd.read_csv(data_path)
-#         self.inputs = torch.tensor(data.drop("emotion", axis=1).values, dtype=torch.float32)
-#         self.labels = torch.tensor(data["emotion"].astype('category').cat.codes.values, dtype=torch.long)
-    
-#     def __len__(self):
-#         return len(self.inputs)
-    
-#     def __getitem__(self, idx):
-#         return self.inputs[idx], self.labels[idx]
-
-# # 2. Do a balanced split of the dataset for train/val/test.
-# def split_dataset(dataset, train_ratio=0.7, val_ratio=0.2, test_ratio=0.1):
-#     train_size = int(train_ratio * len(dataset))
-#     val_size = int(val_ratio * len(dataset))
-#     test_size = len(dataset) - train_size - val_size
-#     return random_split(dataset, [train_size, val_size, test_size])
-
-# # 3. Define a PyTorch model
-# class MyModel(nn.Module):
-#     def __init__(self, input_size, output_size):
-#         super(MyModel, self).__init__()
-#         self.network = nn.Sequential(
-#             nn.Linear(input_size, 128),
-#             nn.ReLU(),
-#             nn.Linear(128, output_size)
-#         )
-    
-#     def forward(self, x):
-#         return self.network(x)
-
-# # 4. Hyperparameter tuning/model selection using the validation dataset
-# def hyperparameter_tuning(train_loader, val_loader, input_size, output_size):
-#     model = MyModel(input_size, output_size)
-#     criterion = nn.CrossEntropyLoss()
-#     optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
-    
-#     best_model = None
-#     best_accuracy = 0
-    
-#     for epoch in range(10):  # Example: 10 epochs
-#         model.train()
-#         for inputs, labels in train_loader:
-#             optimizer.zero_grad()
-#             outputs = model(inputs)
-#             loss = criterion(outputs, labels)
-#             loss.backward()
-#             optimizer.step()
-        
-#         model.eval()
-#         correct = 0
-#         total = 0
-#         with torch.no_grad():
-#             for inputs, labels in val_loader:
-#                 outputs = model(inputs)
-#                 _, predicted = torch.max(outputs.data, 1)
-#                 total += labels.size(0)
-#                 correct += (predicted == labels).sum().item()
-        
-#         accuracy = 100 * correct / total
-#         if accuracy > best_accuracy:
-#             best_accuracy = accuracy
-#             best_model = model.state_dict()
-    
-#     return best_model, best_accuracy
-
-# # 5. Analyze the results
-# def analyze_results(model, test_loader):
-#     model.eval()
-#     correct = 0
-#     total = 0
-#     with torch.no_grad():
-#         for inputs, labels in test_loader:
-#             outputs = model(inputs)
-#             _, predicted = torch.max(outputs.data, 1)
-#             total += labels.size(0)
-#             correct += (predicted == labels).sum().item()
-    
-#     accuracy = 100 * correct / total
-#     print(f'Test Accuracy: {accuracy}%')
-
-# # 6. Classify test_to_submit dataset
-# def classify_test_to_submit(model, data_path):
-#     test_data = pd.read_csv(data_path)
-#     inputs = torch.tensor(test_data.values, dtype=torch.float32)
-#     model.eval()
-#     with torch.no_grad():
-#         outputs = model(inputs)
-#         _, predicted = torch.max(outputs.data, 1)
-#     return predicted
-
-# # 7. Report & submit
-# def main():
-#     dataset = EmotionDataset('dataset.csv')
-#     train_data, val_data, test_data = split_dataset(dataset)
-    
-#     train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
-#     val_loader = DataLoader(val_data, batch_size=32, shuffle=False)
-#     test_loader = DataLoader(test_data, batch_size=32, shuffle=False)
-    
-#     input_size = dataset.inputs.shape[1]
-#     output_size = len(dataset.labels.unique())
-    
-#     best_model_state, best_accuracy = hyperparameter_tuning(train_loader, val_loader, input_size, output_size)
-#     print(f'Best Validation Accuracy: {best_accuracy}%')
-    
-#     model = MyModel(input_size, output_size)
-#     model.load_state_dict(best_model_state)
-    
-#     analyze_results(model, test_loader)
-    
-#     predictions = classify_test_to_submit(model, 'test_to_submit.csv')
-#     print(f'Predictions for test_to_submit.csv: {predictions}')
-
-# if __name__ == "__main__":
-#     main()
