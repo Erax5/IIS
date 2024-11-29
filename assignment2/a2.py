@@ -144,7 +144,7 @@ def main():
     test_loader = DataLoader(test, batch_size=128, shuffle=False)
 
     features_in = train[0][0].shape[0] # number of features in input, i.e. 20
-    features_out = len(dataset.index2label) # number of output features, i.e. 7
+    features_out = len(dataset.index2label) # number of output class, i.e. 7
 
     # best_model = None
     best_accuracy = 0
